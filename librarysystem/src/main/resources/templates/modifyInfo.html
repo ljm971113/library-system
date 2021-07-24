@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>[[${session.result.data.username}]] 信息修改</title>
+    <span th:replace="public :: scriptForm(false)"></span>
+</head>
+<body>
+    <div th:replace="common/header::header(null,null)"></div>
+    <div class="am-g am-g-fixed blog-fixed index-page">
+        <div class="am-u-md-8 am-u-sm-12">
+            <div class="am-u-md-4 am-u-sm-12 blog-sidebar">
+                <div class="blog-sidebar-widget blog-bor">
+                    <h2 class="blog-text-center blog-title"><span>[[${session.result.data.username}]]</span></h2>
+                    <img th:src="@{/static/public/img/me.jpg}" alt="about me" class="blog-entry-img"/>
+                    <p>邮箱: [[${session.result.data.email}]]</p>
+                    <p>电话: [[${session.result.data.phone}]]</p>
+                    <p>您在 [[${session.result.data.since}]] 注册成为我们的会员</p>
+                </div>
+            </div>
+            <br><br>
+            <div th:replace="public::regForm('信息修改','/common/modifyInfo',false)"></div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>用户登录界面</title>
+    <link th:href="@{/static/login/css/bootstrap.min.css}" href="../static/login/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/static/login/css/signin.css}" href="../static/login/css/signin.css" rel="stylesheet">
+</head>
+<body class="text-center" th:background="@{/static/login/img/back.png}" background="../static/login/img/back.png" style="background-repeat: no-repeat; background-size: 100%; width: auto; height: auto;">
+    <form class="form-signin" th:action="@{/userLogin}" th:method="post" >
+        <img class="mb-4" th:src="@{/static/login/img/login.jpg}" src="../static/login/img/login.jpg" width="72px" height="72px">
+        <h1 class="h3 mb-3 font-weight-normal">请登录</h1>
+        <!-- 用户登录错误信息提示框 -->
+        <div th:if="${session.isSuccess}" style="color: red">注册成功</div>
+<!--        <div th:if="${session.isAdmin}" style="color: red">等待系统管理员审核方可登录</div>-->
+        <div th:if="${param.error}" style="color: red;height: 40px;text-align: left;font-size: 1.1em">
+            <img th:src="@{/static/login/img/loginError.jpg}" width="20px">用户名或密码错误，请重新登录！
+        </div>
+        <input type="text" name="username" class="form-control" placeholder="用户名" required="" autofocus="">
+        <input type="password" name="password" class="form-control" placeholder="密码" required="">
+        <div class="checkbox mb-3">
+            <label>
+                <input type="checkbox" name="rememberme"> 记住我
+            </label>
+        </div>
+        <button class="btn btn-primary btn-xl" type="submit" >登录</button>
+        <button class="btn btn-primary btn-xl" type="button"><a th:href="@{/toRegister}"><span style="color: white">注册</span></a></button>
+
+        <p class="mt-5 mb-3 text-muted">Copyright© 2019-2020</p>
+    </form>
+</body>
+</html>

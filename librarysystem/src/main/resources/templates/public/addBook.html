@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>添加图书</title>
+    <link rel="stylesheet" href="../../static/xadmin/css/font.css" th:href="@{/static/xadmin/css/font.css}">
+    <link rel="stylesheet" href="../../static/xadmin/css/xadmin.css" th:href="@{/static/xadmin/css/xadmin.css}">
+    <script type="text/javascript" src="../../static/xadmin/lib/layui/layui.js" th:src="@{/static/xadmin/lib/layui/layui.js}" charset="utf-8"></script>
+    <script type="text/javascript" src="../../static/xadmin/js/xadmin.js" th:src="@{/static/xadmin/js/xadmin.js}"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <form class="layui-form" th:action="@{/admin/addBook}" method="post">
+            <div class="layui-form-item">
+                <div style="color: green" th:text="${res} == null ? '' : ${res.msg} "></div>
+            </div>
+            <div class="layui-form-item">
+                <label for="L_bname" class="layui-form-label">
+                    <span class="x-red">*</span>书名</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="L_bname"
+                           name="bname" required="required" class="layui-input"></div>
+            </div>
+
+            <div class="layui-form-item">
+                <label for="L_typeid" class="layui-form-label">
+                    <span class="x-red">*</span>类型</label>
+                <div class="layui-input-inline">
+                    <select id="L_typeid" name="typeid" class="layui-select">
+                        <span th:each="type : ${types}">
+                            <option th:value="${type.tid}" th:text="${type.typename}"></option>
+                        </span>
+                    </select>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label for="L_author" class="layui-form-label">
+                    <span class="x-red">*</span>作者</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="L_author"
+                           name="author" class="layui-input">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label for="L_companyname" class="layui-form-label">
+                    <span class="x-red">*</span>出版社</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="L_companyname" name="companyname" class="layui-input"></div>
+            </div>
+
+            <div class="layui-form-item">
+                <label for="L_content" class="layui-form-label">
+                    <span class="x-red">*</span>简介</label>
+                <div class="layui-input-inline">
+                    <textarea id="L_content" name="content" class="layui-textarea"></textarea>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label for="L_number" class="layui-form-label">
+                    <span class="x-red">*</span>数量</label>
+                <div class="layui-input-inline">
+                    <input type="number" id="L_number" required="required" name="number" class="layui-input"></div>
+            </div>
+            <div class="layui-form-item">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <input id="submit" class="layui-btn" type="submit" value="添加书籍"/></div>
+        </form>
+    </div>
+</div>
+
+
+<script>layui.use(['form', 'layer'],
+    function() {
+        $ = layui.jquery;
+        var form = layui.form,
+            layer = layui.layer;
+
+    });</script>
+<script>var _hmt = _hmt || []; (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?b393d153aeb26b46e9431fabaf0f6190";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();</script>
+</body>
+</html>

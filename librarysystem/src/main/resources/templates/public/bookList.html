@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>图书列表</title>
+    <link th:href="@{/static/comment/css/xcode.min.css}" href="../../static/comment/css/xcode.min.css" rel="stylesheet"/>
+    <link th:href="@{/static/comment/css/style.min.css}" href="../../static/comment/css/style.min.css" rel="stylesheet"/>
+    <script th:src="@{/static/assets/js/jquery.min.js}" src="../../static/assets/js/jquery.min.js"></script>
+    <script th:src="@{/static/assets/js/amazeui.min.js}" src="../../static/assets/js/amazeui.min.js"></script>
+    <link rel="stylesheet" th:href="@{/static/assets/css/amazeui.min.css}" href="../../static/assets/css/amazeui.min.css"/>
+    <link rel="stylesheet" th:href="@{/static/assets/css/app.css}" href="../../static/assets/css/app.css"/>
+
+
+    <!--[if lt IE 9]>
+    <script th:src="@{/static/public/js/html5shiv.js}"></script>
+    <script th:src="@{/static/public/js/respond.min.js}"></script>
+
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+<body>
+<button onclick="delBatch()" class="am-btn am-btn-warning">批量删除</button>
+<table class="am-table">
+    <thead>
+    <tr>
+        <th>
+            <input type="checkbox" id="checkAll">
+        </th>
+        <th>ID</th>
+        <th>书名</th>
+        <th>作者</th>
+        <th>类型</th>
+        <th>出版社</th>
+        <th>描述</th>
+        <th>馆藏</th>
+        <th>已借出</th>
+        <th>剩余</th>
+        <th>下架操作</th>
+        <th>新增操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <span th:each="book : ${session.bookPageInfo.list}">
+        <tr class="am-active">
+            <td>
+                <input type="checkbox" name="id" value="1" th:value="${book.bid}">
+            </td>
+            <td th:text="${book.bid}">1</td>
+            <td th:text="${book.bname}">Java</td>
+            <td th:text="${book.author}">Sun</td>
+            <td th:text="${book.type.typename}">Sun</td>
+            <td th:text="${book.companyname}">机械电子工程出版社</td>
+            <td class="td-manage" th:utext="${session.commonsUtil.intro(book,15)}">编程入门书籍</td>
+            <td th:text="${book.tblBookReserves.total}">1000</td>
+            <td th:text="${book.tblBookReserves.borrowed}">100</td>
+            <td th:text="${book.tblBookReserves.total} - ${book.tblBookReserves.borrowed}">900</td>
+            <td>
+                <button class="am-btn am-btn-warning am-btn-xs" onclick="delBook(this, false)" value="0" th:value="${book.bid}">
+                    <i class="am-icon-warning"></i>
+                    下架</button>
+                <button class="am-btn am-btn-danger am-btn-xs" onclick="delBook(this, true)" value="0" th:value="${book.bid}">全部下架</button>
+            </td>
+            <td>
+                <button class="am-btn am-btn-primary am-btn-xs" onclick="addBook(this)" value="0" th:value="${book.bid}">
+                    <i class="am-icon-shield"></i>
+                    新增</button>
+            </td>
+        </tr>
+    </span>
+    </tbody>
+</table>
+
+<ol class="am-pagination">
+    <th:block th:if="${session.bookPageInfo.hasPreviousPage}">
+        <li class="am-pagination-prev"><a th:href="@{'/admin/bookList/page/'+${session.bookPageInfo.prePage}}">上一页</a></li>
+    </th:block>
+    <th:block th:each="navIndex :${ session.bookPageInfo.navigatepageNums}">
+        <th:block th:if="${session.bookPageInfo.pages} <= 5">
+            <li th:class="${session.bookPageInfo.pageNum} == ${navIndex} ? 'current' : ''">
+                <a th:href="@{'/admin/bookList/page/' + ${navIndex}}" th:text="${navIndex}"></a>
+            </li>
+        </th:block>
+        <th:block th:if="${session.bookPageInfo.pages} > 5">
+            <li th:if="${session.bookPageInfo.pageNum <=3 &&  navIndex <= 5}" th:class="${session.bookPageInfo.pageNum} == ${navIndex} ? 'current' : ''">
+                <a th:href="@{'/admin/bookList/page/' + ${navIndex}}" th:text="${navIndex}"></a>
+            </li>
+            <li th:if="${session.bookPageInfo.pageNum >= session.bookPageInfo.pages - 2 &&  navIndex > session.bookPageInfo.pages - 5}" th:class="${session.bookPageInfo.pageNum} == ${navIndex} ? 'current' : ''">
+                <a th:href="@{'/admin/bookList/page/' + ${navIndex}}" th:text="${navIndex}"></a>
+            </li>
+            <li th:if="${session.bookPageInfo.pageNum >=4 && session.bookPageInfo.pageNum <= session.bookPageInfo.pages - 3 &&  navIndex >= session.bookPageInfo.pageNum - 2 && navIndex <= session.bookPageInfo.pageNum + 2}"  th:class="${session.bookPageInfo.pageNum} == ${navIndex} ? 'current' : ''">
+                <a th:href="@{'/admin/bookList/page/' + ${navIndex}}" th:text="${navIndex}"></a>
+            </li>
+        </th:block>
+    </th:block>
+    <th:block th:if="${session.bookPageInfo.hasNextPage}">
+        <li class="am-pagination-next"><a th:href="@{'/admin/bookList/page/' + ${session.bookPageInfo.nextPage}}" th:text="${nextText}"></a></li>
+    </th:block>
+</ol>
+</div>
+
+<script type="text/javascript">
+
+    //新增书
+    function addBook(elem) {
+        //获取 bookname 的名字
+        let bookName =  $(elem).parents('tr').children('td:eq(2)').text();
+        //弹框获取需要上架的书本数量
+        let addCount = prompt('输入上架 ' + bookName + '的数量');
+        if(isNaN(addCount) || addCount <= 0){
+            if(addCount !== null){
+                alert('请输入正确且大于0数字');
+            }
+            return;
+        }
+        //获取book的bid
+        let bid = elem.value;
+        let info = new Array(3);
+        info[0] = bid;
+        info[1] = addCount;
+        info[2] = 1;
+        $.ajax({
+            type: 'GET',
+            url: '/libsys/admin/changeBookCount',
+            data: { "info" : info },
+            success: function (data) {
+                alert(data.msg);
+                if(data.code === 200 || data.code === 405){
+                    window.location.reload();
+                }
+            }
+        });
+    }
+
+    function delBook(elem, all) {
+        let info = new Array(3);
+        //获取数量之后直接发送ajax请求
+        info[0] = $(elem).val();//当前元素的value值, 也就是 bid
+        let totalBook = BigInt($(elem).parents('tr').children('td:eq(7)').text());//获取图书馆藏
+        let borrowed = BigInt($(elem).parents('tr').children('td:eq(8)').text());//获取借出去的书的数量
+        if(all){
+            //如果是全部下架
+            info[1] = totalBook - borrowed;
+        }else{
+            //弹框要求输入下架数量
+            //获取 bookname 的名字
+            let bookName =  $(elem).parents('tr').children('td:eq(2)').text();
+            let delCount = prompt('输入下架 ' + bookName + '的数量');
+            if(isNaN(delCount) || delCount <= 0){
+                if(addCount !== null){
+                    alert('请输入正确且大于0数字');
+                }
+                return;
+            }
+            if(delCount > (totalBook - borrowed)){
+                alert("Sorry, 当前在馆没有这么多书哦!");
+                return;
+            }
+            info[1] = delCount;
+        }
+        info[2] = 0;
+        $.ajax({
+            type: 'GET',
+            url: '/libsys/admin/changeBookCount',
+            data: {"info":info},
+            success: function (data) {
+                alert(data.msg);
+                if(data.code === 200 || data.code === 405){
+                    window.location.reload();
+                }
+            }
+        });
+    }
+
+    function delBatch() {
+        let chks = $(":input[name='id']:checked");
+        if(chks.length === 0){
+            alert("没有任何选择!");
+            return;
+        }
+        //多次点击, 发送的是多个ID
+        let ids = new Array(chks.length);
+        for(let i = 0; i < chks.length; ++i){
+            ids[i] = chks[i].value;
+        }
+        //异步发送 AJAX 请求, 发送 ids 到
+        $.ajax({
+            type: 'GET',
+            url: '/libsys/admin/delBookCountBatch',
+            data: {"ids":ids},
+            success: function (data) {
+                alert(data.msg);
+                if(data.code === 200 || data.code === 405){
+                    window.location.reload();
+                }
+            }
+        });
+
+        //最后, 将左侧栏的 checkbox 还原状态
+        for(let i = 0; i < chks.length; ++i){
+            chks[i].checked = false;
+        }
+        $("#checkAll")[0].checked = false;
+
+    }
+
+    $(function () {
+
+        $("#checkAll").click(function () {
+            var statu = this.checked;
+            //获取全部单选框
+            var chks = $(":input[name='id']");
+            for(var i = 0; i < chks.length; ++i){
+                //判断各个input是否被选中
+                chks[i].checked = statu;
+            }
+        });
+
+
+        $(":input[name='id']").click(function () {
+            var chks = $(":input[name='id']");
+            var checkedCount = 0;
+            for(var i = 0; i < chks.length; ++i){
+                if(chks[i].checked === true){
+                    checkedCount++;
+                }
+            }
+            //获取 chkAll 对象
+            var checkAll = $("#checkAll")[0];
+            if(checkedCount === chks.length){
+                checkAll.checked = true;
+            }else{
+                checkAll.checked = false;
+            }
+        });
+    });
+
+</script>
+</body>
+</html>

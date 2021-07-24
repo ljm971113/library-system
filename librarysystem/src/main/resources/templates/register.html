@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>欢迎注册</title>
+    <div th:replace="public::scriptForm(true)"></div>
+</head>
+<body>
+<!--添加标题栏-->
+<div th:replace="common/header::header(null,false)"></div>
+<!--添加 FROM 表单-->
+<div class="am-g am-g-fixed blog-fixed index-page">
+    <div class="am-u-md-8 am-u-sm-12">
+        <div th:replace="public::regForm('注册信息','/register',true)"></div>
+    </div>
+</div>
+</body>
+</html>

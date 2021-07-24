@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>查找图书</title>
+    <link rel="stylesheet" href="../../static/xadmin/css/font.css" th:href="@{/static/xadmin/css/font.css}">
+    <link rel="stylesheet" href="../../static/xadmin/css/xadmin.css" th:href="@{/static/xadmin/css/xadmin.css}">
+    <script src="../../static/xadmin/lib/layui/layui.js" charset="utf-8" th:src="@{/static/xadmin/lib/layui/layui.js}"></script>
+    <script type="text/javascript" src="../../static/xadmin/js/xadmin.js" th:src="@{/static/xadmin/js/xadmin.js}"></script>
+
+    <link th:href="@{/static/comment/css/xcode.min.css}" href="../../static/comment/css/xcode.min.css" rel="stylesheet"/>
+    <link th:href="@{/static/comment/css/style.min.css}" href="../../static/comment/css/style.min.css" rel="stylesheet"/>
+    <script th:src="@{/static/assets/js/jquery.min.js}" src="../../static/assets/js/jquery.min.js"></script>
+    <script th:src="@{/static/assets/js/amazeui.min.js}" src="../../static/assets/js/amazeui.min.js"></script>
+    <link rel="stylesheet" th:href="@{/static/assets/css/amazeui.min.css}" href="../../static/assets/css/amazeui.min.css"/>
+    <link rel="stylesheet" th:href="@{/static/assets/css/app.css}" href="../../static/assets/css/app.css"/>
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <form class="layui-form layui-col-space5" th:action="@{/admin/searchBook}" method="post">
+                        <div class="layui-input-inline layui-show-xs-block">
+                            <input type="number" name="bid" placeholder="图书编号" class="layui-input">
+                        </div>
+                        <div class="layui-input-inline layui-show-xs-block">
+                            <input type="text" name="bname" placeholder="图书名称" class="layui-input">
+                        </div>
+                        <div class="layui-input-inline layui-show-xs-block">
+                            <input type="text" name="author" placeholder="作者" class="layui-input">
+                        </div>
+                        <div class="layui-input-inline layui-show-xs-block">
+                            <input type="text" name="companyname" placeholder="出版社" class="layui-input">
+                        </div>
+                        <div class="layui-input-inline layui-show-xs-block">
+                            <select id="L_typeid" name="typeid" class="layui-select">
+                                <span th:each="type : ${types}">
+                                    <option th:value="${type.tid}" th:text="${type.typename}"></option>
+                                </span>
+                            </select>
+                        </div>
+                        <div class="layui-input-inline layui-show-xs-block">
+                            <button class="layui-btn" type="submit" lay-filter="sreach">
+                                <i class="layui-icon">&#xe615;</i></button>
+                        </div>
+                    </form>
+                </div>
+                <div th:if="${searchResult} != null">
+                    <th:block>
+                        <!--显示查询出来的表单-->
+                        <table class="am-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>书名</th>
+                                    <th>作者</th>
+                                    <th>类型</th>
+                                    <th>出版社</th>
+                                    <th>描述</th>
+                                    <th>馆藏</th>
+                                    <th>已借出</th>
+                                    <th>剩余</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <th:block th:each="book : ${searchResult}">
+                                <tr class="am-active">
+                                    <td th:text="${book.bid}">1</td>
+                                    <td th:text="${book.bname}">Java</td>
+                                    <td th:text="${book.author}">Sun</td>
+                                    <td th:text="${book.type.typename}">Sun</td>
+                                    <td th:text="${book.companyname}">机械电子工程出版社</td>
+                                    <td class="td-manage" th:utext="${commonsUtil.intro(book,75)}">编程入门书籍</td>
+                                    <td th:text="${book.tblBookReserves.total}">1000</td>
+                                    <td th:text="${book.tblBookReserves.borrowed}">100</td>
+                                    <td th:text="${book.tblBookReserves.total} - ${book.tblBookReserves.borrowed}">900</td>
+                                </tr>
+                            </th:block>
+                            </tbody>
+                        </table>
+                    </th:block>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<script>
+    layui.use(['laydate', 'form'],
+        function() {
+            var laydate = layui.laydate;
+
+            //执行一个laydate实例
+            laydate.render({
+                elem: '#start' //指定元素
+            });
+
+            //执行一个laydate实例
+            laydate.render({
+                elem: '#end' //指定元素
+            });
+        });
+</script>
+</html>

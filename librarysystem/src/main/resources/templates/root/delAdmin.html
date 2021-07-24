@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>禁用/启用管理员</title>
+    <link th:href="@{/static/comment/css/xcode.min.css}" href="../../static/comment/css/xcode.min.css" rel="stylesheet"/>
+    <link th:href="@{/static/comment/css/style.min.css}" href="../../static/comment/css/style.min.css" rel="stylesheet"/>
+    <script th:src="@{/static/assets/js/jquery.min.js}" src="../../static/assets/js/jquery.min.js"></script>
+    <script th:src="@{/static/assets/js/amazeui.min.js}" src="../../static/assets/js/amazeui.min.js"></script>
+    <link rel="stylesheet" th:href="@{/static/assets/css/amazeui.min.css}" href="../../static/assets/css/amazeui.min.css"/>
+    <link rel="stylesheet" th:href="@{/static/assets/css/app.css}" href="../../static/assets/css/app.css"/>
+    <!--[if lt IE 9]>
+    <script th:src="@{/static/public/js/html5shiv.js}"></script>
+    <script th:src="@{/static/public/js/respond.min.js}"></script>
+    <![endif]-->
+</head>
+<body>
+    <button onclick="delAll()" class="am-btn am-btn-warning">批量禁用/启用</button>
+    <table class="am-table">
+        <thead>
+        <tr>
+            <th>
+                <input type="checkbox" id="checkAll" />
+            </th>
+            <th>ID</th>
+            <th>用户名</th>
+            <th>性别</th>
+            <th>电话</th>
+            <th>邮箱</th>
+            <th>注册时间</th>
+            <th>启用/禁用</th>
+        </tr>
+        </thead>
+        <tbody>
+            <span th:each="admin : ${admins}">
+                <tr class="am-active">
+                    <td>
+                        <input type="checkbox" name="id" value="1" th:value="${admin.uid}">
+                    </td>
+                    <td th:text="${admin.uid}">1</td>
+                    <td th:text="${admin.username}">邱康明</td>
+                    <td th:text="${admin.gender} == 0 ? '男' : '女'">男</td>
+                    <td th:text="${admin.phone}">15679718827</td>
+                    <td class="td-manage" th:text="${admin.email}">411882767@qq.com</td>
+                    <td th:text="${admin.since}">2020-06-01</td>
+                    <td><span id="statuInfo" th:text="${admin.status == 1} ? '已启用' : '已禁用'">已启用</span>&nbsp;&nbsp;<input onclick="statuChange(this, false)" type="checkbox" value="1" name="status" th:value="${admin.uid}" th:checked="${admin.status == 1}" checked></td>
+                </tr>
+            </span>
+        </tbody>
+    </table>
+    <script type="text/javascript">
+
+        //这个函数要做的就是将ids里面的id号的checkbox给置为反状态
+        function delAll() {
+            let chks = $(":input[name='id']:checked");
+            if(chks.length === 0){
+                alert("没有任何选择!");
+                return;
+            }
+            //多次点击, 发送的是多个ID
+            let ids = new Array(chks.length);
+            for(let i = 0; i < chks.length; ++i){
+                ids[i] = chks[i].value;
+            }
+            //异步发送 AJAX 请求, 发送 ids 到
+            $.ajax({
+                type: 'GET',
+                url: '/libsys/root/delAdmin',
+                data: {"ids":ids},
+                success: function (data) {
+                    alert(data.msg);
+                }
+            });
+
+
+            //ids 就是当前选择的, 下面要做的是将禁用的改为启用, 启用的改为禁用
+            for(let i = 0; i < chks.length; ++i){
+                $(":input[name='status']").each(function () {
+                    // alert(chks[i].value);
+                    if(chks[i].value === this.value){
+                        statuChange(this, true);
+                    }
+                });
+            }
+
+            //最后, 将左侧栏的 checkbox 还原状态
+            for(let i = 0; i < chks.length; ++i){
+                chks[i].checked = false;
+            }
+            $("#checkAll")[0].checked = false;
+
+        }
+
+        function statuChange(elem, flag){
+            if(flag){
+                if(elem.checked){
+                    elem.checked = false;
+                    $(elem).prev().text('已禁用');
+                }else{
+                    elem.checked = true;
+                    $(elem).prev().text('已启用');
+                }
+            }else{
+                //单次点击, 发送的是一个id
+                let ids = new Array(1);
+                ids[0] = elem.value;
+                $.ajax({
+                    type: 'GET',
+                    url: '/libsys/root/delAdmin',
+                    data: {"ids":ids},
+                    success: function (data) {
+                        alert(data.msg);
+                    }
+                });
+                var selfChecked = elem.checked;
+                if(selfChecked){
+                    $(elem).prev().text('已启用');
+                }else{
+                    $(elem).prev().text('已禁用');
+                }
+            }
+        }
+
+        $(function () {
+
+            $("#checkAll").click(function () {
+                var statu = this.checked;
+                //获取全部单选框
+                var chks = $(":input[name='id']");
+                for(var i = 0; i < chks.length; ++i){
+                    //判断各个input是否被选中
+                    chks[i].checked = statu;
+                }
+            });
+
+
+            $(":input[name='id']").click(function () {
+                var chks = $(":input[name='id']");
+                var checkedCount = 0;
+                for(var i = 0; i < chks.length; ++i){
+                    if(chks[i].checked === true){
+                        checkedCount++;
+                    }
+                }
+                //获取 chkAll 对象
+                var checkAll = $("#checkAll")[0];
+                if(checkedCount === chks.length){
+                    checkAll.checked = true;
+                }else{
+                    checkAll.checked = false;
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>

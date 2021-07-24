@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div th:fragment="regForm(title,action,isReg)">
+        <form class="am-form" th:action="@{${action}}" method="post">
+            <fieldset>
+                <legend>[[${title}]]</legend>
+                <!--填充隐藏字段信息-->
+                <div th:if="${isReg} == false">
+                    <input type="hidden" name="uid" th:value="${session.result.data.uid}"/>
+                    <input type="hidden" name="authority" th:value="${session.result.data.authority}"/>
+                    <input type="hidden" name="since" th:value="${session.result.data.since}"/>
+                    <input type="hidden" name="status" th:value="${session.result.data.status}"/>
+                </div>
+
+                <div class="am-form-group">
+                    <label for="doc-ipt-username-1">用户名</label>
+                    <input name="username" type="text" class="" id="doc-ipt-username-1" placeholder="写上独一无二的名字"
+                           th:if="${isReg == false}"
+                           th:value="${session.result.data.username}" onchange="checkUsername()"><span id="usernameFlg"></span>
+                    <input name="username" type="text" class="" id="doc-ipt-username-1" placeholder="写上独一无二的名字"
+                           th:if="${isReg == true}" onchange="checkUsername()"><span id="usernameFlg"></span>
+                </div>
+
+                <div class="am-form-group">
+                    <label for="doc-ipt-password-1">密码</label>
+                    <input name="password" type="password" class="" id="doc-ipt-password-1" placeholder="设置个密码吧"
+                           th:if="${isReg == false}"
+                           th:value="${session.result.data.password}">
+                    <input name="password" type="password" class="" id="doc-ipt-password-1" placeholder="设置个密码吧"
+                           th:if="${isReg == true}">
+                </div>
+
+                <div class="am-form-group">
+                    <label for="doc-ipt-email-1">邮箱</label>
+                    <input name="email" type="email" class="" id="doc-ipt-email-1" placeholder="输入电子邮件"
+                           th:if="${isReg == false}"
+                           th:value="${session.result.data.email}">
+                    <input name="email" type="email" class="" id="doc-ipt-email-1" placeholder="输入电子邮件"
+                           th:if="${isReg == true}">
+                </div>
+
+                <div class="am-form-group">
+                    <label>性别</label> <br>
+                    <label class="am-radio-inline">
+                        <input checked type="radio" value="0" name="gender"> 男
+                    </label>
+                    <label class="am-radio-inline">
+                        <input type="radio" value="1" name="gender"> 女
+                    </label>
+                </div>
+
+                <div class="am-form-group">
+                    <label for="doc-ipt-phone-1">手机号码</label>
+                    <input name="phone" type="text" class="" id="doc-ipt-phone-1" placeholder="注意保护隐私哦~"
+                           th:if="${isReg == false}"
+                           th:value="${session.result.data.phone}">
+                    <input name="phone" type="text" class="" id="doc-ipt-phone-1" placeholder="注意保护隐私哦~"
+                           th:if="${isReg == true}">
+                </div>
+                <div th:if="${isReg} == true">
+                    <div class="am-form-group">
+                        <label for="roleSelect">选择权限 <span style="font-size: 15px;color: red;">(管理员需等待系统管理员审核通过则注册成功之后直接登录)</span></label>
+                        <select id="roleSelect" name="authority">
+                            <option value="ROLE_admin">图书管理员</option>
+                            <option value="ROLE_common">普通用户(读者)</option>
+                        </select>
+                        <span class="am-form-caret"></span>
+                    </div>
+                </div>
+                <p>
+                    <button id="submit" type="submit" class="am-btn am-btn-success">提交</button>
+                    <a th:if="${isReg == true}" th:href="@{/}" class="am-btn am-btn-success">取消</a>
+                    <a th:if="${isReg == false}" th:href="@{${preUrl}}" class="am-btn am-btn-success">取消</a>
+                </p>
+            </fieldset>
+        </form>
+    </div>
+
+    <div th:fragment="scriptForm(isReg)">
+        <script type="text/javascript" th:src="@{/static/assets/js/jquery.js}"></script>
+        <script type="text/javascript">
+            function checkUsername(){
+                var returnVal = true;
+                var username = $("#doc-ipt-username-1").val().trim();
+                var isReg = '[[${isReg}]]';
+
+                if(username !== '' /*&& username !== username_old*/){
+                    var url = '[[@{/common/checkUsername}]]';
+                    var flag = $("#usernameFlg");
+
+                    $.ajax({
+                        type: 'GET',
+                        url: url,
+                        data: {
+                            "username":username
+                        },
+                        async: false,//此处设置为同步请求原因是: 异步请求会在还没来得及更改 returnVal 的值的时候函数就返回了
+                        //由于这里是一个简单的操作, 所以可以设置为同步, 如果复杂的耗时操作, 则就没必要了
+                        success: function (data) {
+                            if(data){
+                                flag.css('color','green');
+                                flag.text('用户名可以使用');
+                            }else{
+                                flag.css('color','red');
+                                flag.text('用户名重复');
+                                returnVal = false;
+                            }
+                        }
+                    });
+                }else{
+                    returnVal = false;
+                }
+                return returnVal;
+            }
+
+            $(function () {
+                $("#submit").click(function () {
+                    var flag = checkUsername();
+                    //获取页面所有输入框的值
+                    var username = $("#doc-ipt-username-1").val().trim();
+                    var password = $("#doc-ipt-password-1").val().trim();
+                    var email = $("#doc-ipt-email-1").val().trim();
+                    var gender = $('input[name="gender"]:checked').val().trim();
+                    var phone = $("#doc-ipt-phone-1").val().trim();
+                    if(username !== '' && password !== '' && email !== '' &&
+                        gender !== '' && phone !== null && flag){
+                        return true;
+                    }
+                    return false;
+                });
+
+            });
+        </script>
+    </div>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>读者首页</title>
+</head>
+<body>
+    <!--
+        首先读者的功能:
+        1. 查看当前借书情况
+        2. 可以浏览当前图书馆的图书信息, 并可以有借阅的权限
+        3. 可以归还图书, 续借图书
+        4. 可以修改自己的个人信息
+    -->
+    <div th:replace="common/header::header(null,null)"></div>
+
+    <div class="am-g am-g-fixed blog-fixed index-page">
+        <div class="am-u-md-8 am-u-sm-12">
+            <!-- 图书遍历并分页展示 -->
+            <div th:each="book: ${books.list}">
+                <article class="am-g blog-entry-article">
+                    <div class="am-u-lg-3 am-u-md-6 am-u-sm-6 blog-entry-img">
+                        <img width="100%" class="am-u-sm-12" th:src="@{'/static/'+${commons.show_thumb(book)}}"/>
+                    </div>
+                    <div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-text">
+                        <!-- 图书分类 -->
+                        <span class="blog-color"style="font-size: 15px;">类别: <a>[[${book.type.typename}]]</a></span>
+                        <span>&nbsp;&nbsp;&nbsp;</span>
+                        <span style="font-size: 15px;" th:text="'出版社 '+ ${book.companyname}"></span>
+                        <h2>
+                            <div><a style="color: #0f9ae0;font-size: 20px;" th:href="@{'/common/book/' + ${book.bid}}" th:text="${book.bname}"></a></div>
+                        </h2>
+                        <!-- 图书摘要-->
+                        <div style="font-size: 16px;" th:utext="${commons.intro(book,75)}"></div>
+                    </div>
+                </article>
+            </div>
+            <!-- 文章分页信息 -->
+            <div class="am-pagination">
+                <div th:replace="paging::pageNav(${books},'上一页','下一页','common/page/')"></div>
+            </div>
+        </div>
+
+        <div class="am-u-md-4 am-u-sm-12 blog-sidebar">
+            <!-- 博主信息描述 -->
+            <div class="blog-sidebar-widget blog-bor">
+                <h2 class="blog-text-center blog-title"><span>[[${session.result.data.username}]]</span></h2>
+                <img th:src="@{/static/public/img/me.jpg}" alt="about me" class="blog-entry-img"/>
+                <p>邮箱: [[${session.result.data.email}]]</p>
+                <p>电话: [[${session.result.data.phone}]]</p>
+                <p>您在 [[${session.result.data.since}]] 注册成为我们的会员</p>
+                <p th:if="${session.result.data.authority} == 'ROLE_common'" style="color: red;">修改的信息话,点击 <a th:href="@{/common/toModify}">这里</a> 呀</p>
+            </div>
+            <!--借书情况-->
+            <div class="blog-sidebar-widget blog-bor" th:if="${session.result.data.authority} == 'ROLE_common'">
+                <h2 class="blog-text-center blog-title"><span>借书情况</span></h2>
+                <div th:if="${borroInfoList == null}">暂无借书记录!</div>
+                <div th:if="${borroInfoList != null}">
+                    <table>
+                        <thead>
+                            <td>书名</td>
+                            <td>借书日期</td>
+                            <td>应还日期</td>
+                            <td>数量</td>
+                        </thead>
+                        <tbody>
+                        <div th:each="borroInfo: ${session.borroInfoList}">
+                            <tr>
+                                <td>[[${borroInfo.bname}]]</td>
+                                <td>[[${borroInfo.brrodate}]]</td>
+                                <td>[[${borroInfo.returndate}]]</td>
+                                <td>[[${borroInfo.totalbrrow}]]</td>
+                            </tr>
+                        </div>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- 阅读排行榜 -->
+        <div class="am-u-md-4 am-u-sm-12 blog-sidebar">
+            <div class="blog-sidebar-widget blog-bor">
+                <h2 class="blog-text-center blog-title"><span>图书排行榜</span></h2>
+                <div style="text-align: left">
+                    <th:block th:each="book :${bookList}">
+                        <a  style="font-size: 15px;" >
+                            <div>[[${book.bname}]]([[${book.tblBookReserves.borrowed}]])</div>
+                        </a>
+                        <hr style="margin-top: 0.6rem;margin-bottom: 0.4rem" />
+                    </th:block>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 载入文章尾部页面，位置在/client文件夹下的footer模板页面，模板名称th:fragment为footer -->
+    <div th:replace="common/footer::footer"></div>
+</body>
+</html>

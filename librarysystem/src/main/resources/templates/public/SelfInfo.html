@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>个人信息</title>
+    <link rel="stylesheet" href="../../static/xadmin/css/font.css" th:href="@{/static/xadmin/css/font.css}">
+    <link rel="stylesheet" href="../../static/xadmin/css/xadmin.css" th:href="@{/static/xadmin/css/xadmin.css}">
+    <script type="text/javascript" src="../../static/xadmin/lib/layui/layui.js" th:src="@{/static/xadmin/lib/layui/layui.js}" charset="utf-8"></script>
+    <script type="text/javascript" src="../../static/xadmin/js/xadmin.js" th:src="@{/static/xadmin/js/xadmin.js}"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <form class="layui-form">
+            <div class="layui-form-item">
+                <label for="L_username" class="layui-form-label">
+                    <span class="x-red">*</span>用户名</label>
+                <div class="layui-input-inline">
+                    <input disabled th:value="${session.result.data.username}" type="text" id="L_username"
+                           name="username" required="" lay-verify="username" autocomplete="off" class="layui-input"></div>
+                <div class="layui-form-mid layui-word-aux">
+                    <span class="x-red">*</span>这是您唯一的登入名</div></div>
+            <div class="layui-form-item">
+                <label for="L_password" class="layui-form-label">
+                    <span class="x-red">*</span>密码</label>
+                <div class="layui-input-inline">
+                    <input disabled th:value="${session.result.data.password}" type="password" id="L_password" name="password" required="" lay-verify="password" autocomplete="off" class="layui-input"></div>
+            </div>
+            <div class="layui-form-item">
+                <label for="L_email" class="layui-form-label">
+                    <span class="x-red">*</span>邮箱</label>
+                <div class="layui-input-inline">
+                    <input disabled th:value="${session.result.data.email}" type="text" id="L_email" name="email" required="" lay-verify="email" autocomplete="off" class="layui-input"></div>
+            </div>
+            <div class="layui-form-item">
+                <label for="L_phone" class="layui-form-label">
+                    <span class="x-red">*</span>电话</label>
+                <div class="layui-input-inline">
+                    <input disabled th:value="${session.result.data.phone}" type="text" id="L_phone" name="phone" required="" lay-verify="phone" autocomplete="off" class="layui-input"></div>
+                </div>
+            <div class="layui-form-item">
+                <label for="L_authority" class="layui-form-label">
+                    <span class="x-red">*</span>角色</label>
+                <div class="layui-input-inline">
+                    <input disabled th:value="${session.result.data.authority}" type="text" id="L_authority" name="authority" required="" lay-verify="authority" autocomplete="off" class="layui-input"></div>
+            </div>
+            <div class="layui-form-item">
+                <label for="L_since" class="layui-form-label">
+                    <span class="x-red">*</span>注册时间</label>
+                <div class="layui-input-inline">
+                    <input disabled th:value="${session.result.data.since}" type="text" id="L_since" name="since" required="" lay-verify="since" autocomplete="off" class="layui-input"></div>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

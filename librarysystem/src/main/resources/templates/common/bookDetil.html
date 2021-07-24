@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>[[${book.bname}]] 详情</title>
+</head>
+<body>
+<div th:replace="common/header::header(null,null)"></div>
+<!--图书详情DIV-->
+<div class="am-g am-g-fixed blog-fixed index-page">
+    <div class="am-u-md-8 am-u-sm-12">
+        <article class="am-g blog-entry-article">
+            <div class="am-u-lg-3 am-u-md-6 am-u-sm-6 blog-entry-img">
+                <img width="100%" class="am-u-sm-12" th:src="@{'/static/public/img/bookThumb/' + ${book.bid} + '.png'}"/>
+            </div>
+            <div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-text">
+                <!-- 图书分类 -->
+                <span class="blog-color"style="font-size: 15px;">类别: <a>[[${book.type.typename}]]</a></span>
+                <span>&nbsp;&nbsp;&nbsp;</span>
+                <span style="font-size: 15px;" th:text="'出版社 '+ ${book.companyname}"></span>
+                <h2>
+                    <div><span style="color: #0f9ae0;font-size: 20px;" th:text="${book.bname}"></span></div>
+                </h2>
+                <!-- 图书摘要-->
+                <div style="font-size: 16px;" th:utext="${book.content}"></div>
+            </div>
+        </article>
+    </div>
+    <br><br>
+    <div class="col-md-12" th:if="${session.result.data.authority} == 'ROLE_common'">
+        <a th:href="@{'/common/index'}" class="blog-text-center blog-title">主页</a>
+        <div class="am-u-md-4 am-u-sm-12 blog-sidebar">
+            <div class="blog-sidebar-widget blog-bor">
+                <h2 class="blog-text-center blog-title"><span>操作中心</span></h2>
+                <p>馆藏: [[${book.tblBookReserves.total}]]</p>
+                <p>已借出: [[${book.tblBookReserves.borrowed}]]</p>
+                <button type="button" class="am-btn am-btn-primary"
+                        data-am-modal="{target: '#borrowModal', closeViaDimmer: 0, width: 400, height: 225}">
+                    借书</button>
+                <button id="returnBtn" type="button" class="am-btn am-btn-warning"
+                        data-am-modal="{target: '#returnModal', closeViaDimmer: 0, width: 400, height: 225}">
+                    还书</button>
+                <button id="longgerBtn" type="button" class="am-btn am-btn-secondary">
+                    续借</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--定义模态窗口-->
+<!--借书模态框-->
+<div class="am-modal am-modal-prompt" tabindex="-1" id="borrowModal" th:if="${session.result.data.authority}">
+    <div class="am-modal-dialog">
+        <div class="am-modal-hd">借书操作</div>
+        <div class="am-modal-bd">
+            当前书籍: [[${book.bname}]]<br>
+            已借出: [[${book.tblBookReserves.borrowed}]]<br>
+            剩余馆藏: [[${book.tblBookReserves.total} - ${book.tblBookReserves.borrowed}]]<br>
+            借书数量: <input id="borroNum" type="text"style="border: black 1px solid">
+        </div>
+        <div class="am-modal-footer">
+            <span class="am-modal-btn" data-am-modal-cancel>取消</span>
+            <span id="span_submit" class="am-modal-btn" data-am-modal-confirm>提交</span>
+        </div>
+    </div>
+</div>
+
+<!--还书模态框-->
+<div class="am-modal am-modal-prompt" tabindex="-1" id="returnModal" th:if="${session.result.data.authority}">
+    <div class="am-modal-dialog">
+        <div class="am-modal-hd">还书操作</div>
+        <div class="am-modal-bd">
+            <div th:each="borroInfo: ${session.borroInfoList}">
+                <div th:if="${borroInfo.bookid} == ${book.bid}">
+                    当前书籍您已借 <span id="totalBrrow">[[${borroInfo.totalbrrow}]]</span> 本!<br>
+                    还书数量: <input id="retuenNum" type="text"style="border: black 1px solid">
+                </div>
+<!--                <div th:if="${borroInfo.bookid} != ${book.bid}">-->
+<!--                    您尚未借该本书!-->
+<!--                </div>-->
+            </div>
+        </div>
+        <div class="am-modal-footer">
+            <span class="am-modal-btn" data-am-modal-cancel>取消</span>
+            <span id="span_submit_return" class="am-modal-btn" data-am-modal-confirm>提交</span>
+        </div>
+    </div>
+</div>
+
+<!--续借模态窗口-->
+<div class="am-modal am-modal-prompt" tabindex="-1" id="longgerModal" th:if="${session.result.data.authority}">
+    <div class="am-modal-dialog">
+        <div class="am-modal-hd">续借</div>
+        <div class="am-modal-bd">
+            当前书籍: [[${book.bname}]]<br>
+            已借出: [[${book.tblBookReserves.borrowed}]]<br>
+            剩余馆藏: [[${book.tblBookReserves.total} - ${book.tblBookReserves.borrowed}]]<br>
+            借书数量: <input id="borroNum" type="text"style="border: black 1px solid">
+        </div>
+        <div class="am-modal-footer">
+            <span class="am-modal-btn" data-am-modal-cancel>取消</span>
+            <span id="span_submit" class="am-modal-btn" data-am-modal-confirm>提交</span>
+        </div>
+    </div>
+</div>
+
+<!-- 载入文章尾部页面，位置在/client文件夹下的footer模板页面，模板名称th:fragment为footer -->
+<div th:replace="common/footer::footer"></div>
+
+
+<script type="text/javascript" th:inline="javascript" >
+
+    $(function () {
+        //借书操作
+        $("#span_submit").click(function () {
+            //获得剩余馆藏数量
+            var surplus = BigInt('[[${book.tblBookReserves.total} - ${book.tblBookReserves.borrowed}]]');
+            //获取输入书的数量
+            var bookNum = BigInt($("#borroNum").val());
+            if(bookNum > surplus || bookNum === 0n){
+                alert("输入错误!")
+                $("#borroNum").val('');
+                return false;
+            }
+            var bid = '[[${book.bid}]]';
+            var uid = '[[${session.result.data.uid}]]';
+            //发送AJAX请求
+            var url = '/libsys/common/borrowOrreturn';
+            $.ajax({
+                type: 'GET',
+                url: url,
+                data: {
+                    "bid" : bid,
+                    "uid" : uid,
+                    "number" : bookNum,
+                    "isBorrow" : true
+                },
+                success: function (data) {
+                    if(data.code === 200){
+                        alert(data.msg);
+                        window.location.reload();
+                    }else{
+                        alert("错误码: " + data.code + '<br>' +
+                        "错误信息:" + data.msg);
+                    }
+                }
+            });
+            $("#borroNum").val('');
+        });
+
+        //还书操作
+        //前提函数
+        $("#returnBtn").click(function () {
+            //获得当前借书的数目
+            //获得借书数量
+            var borrowedNum = BigInt($("#totalBrrow").text());
+            if(borrowedNum === 0n){
+                alert('请先借书!');
+                return false;
+            }
+            return true;
+        });
+        $("#span_submit_return").click(function () {
+            //获得借书数量
+            var borrowedNum = BigInt($("#totalBrrow").text());
+            //获得输入还书数量
+            var retuenNum = BigInt($("#retuenNum").val());
+
+            if(retuenNum > borrowedNum || retuenNum === 0n){
+                alert("输入错误!");
+                return false;
+            }
+
+            //还书操作, 进行AJAX请求, 还书操作需要的数据: 图书ID, 用户ID, 还书数量
+            var bid = '[[${book.bid}]]';
+            var uid = '[[${session.result.data.uid}]]';
+            var url = '/libsys/common/borrowOrreturn';
+            $.ajax({
+                type: 'GET',
+                url: url,
+                data: {
+                    "bid" : bid,
+                    "uid" : uid,
+                    "number" : retuenNum,
+                    "isBorrow" : false
+                },
+                success: function (data) {
+                    if(data.code === 200){
+                        alert(data.msg);
+                        window.location.reload();
+                    }else{
+                        alert("错误码: " + data.code + '<br>' +
+                            "错误信息:" + data.msg);
+                    }
+                }
+            });
+        });
+
+        //续借操作
+        $("#longgerBtn").click(function () {
+            //获得当前借书的数目
+            //获得借书数量
+            var borrowedNum = BigInt($("#totalBrrow").text());
+            if(borrowedNum === 0n){
+                alert('请先借书!');
+                return false;
+            }
+            if(confirm('是否续借?')){
+                //续借操作就发送一个AJAX请求, 然后更新一下数据, 更新session
+                //获得图书id, 用户id
+                var bid = '[[${book.bid}]]';
+                var uid = '[[${session.result.data.uid}]]';
+                var url = '/libsys/common/longger';
+                //发送请求
+                $.ajax({
+                    type: 'GET',
+                    url: url,
+                    data: {
+                        "bid" : bid,
+                        "uid" : uid,
+                    },
+                    success: function (data) {
+                        if(data.code === 200){
+                            alert(data.msg);
+                        }else{
+                            alert("错误码: " + data.code + '<br>' +
+                                "错误信息:" + data.msg);
+                        }
+                    }
+                });
+                return true;
+            }
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

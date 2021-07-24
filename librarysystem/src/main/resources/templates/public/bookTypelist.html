@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>图书类别列表</title>
+    <link rel="stylesheet" href="../../static/xadmin/css/font.css" th:href="@{/static/xadmin/css/font.css}">
+    <link rel="stylesheet" href="../../static/xadmin/css/xadmin.css" th:href="@{/static/xadmin/css/xadmin.css}">
+    <script src="../../static/xadmin/lib/layui/layui.js" charset="utf-8" th:src="@{/static/xadmin/lib/layui/layui.js}"></script>
+    <script type="text/javascript" src="../../static/xadmin/js/xadmin.js" th:src="@{/static/xadmin/js/xadmin.js}"></script>
+    <script type="text/javascript" src="../../static/assets/js/jquery.min.js" th:src="@{/static/assets/js/jquery.min.js}"></script>
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <div class="layui-form layui-col-space5">
+                        <div class="layui-input-inline layui-show-xs-block">
+                            <label for="select_type" class="layui-form-label-col">
+                                <span class="x-red">*</span>当前已有分类:</label>
+                            <select id="select_type" name="typeid" class="layui-select">
+                                <span th:each="type : ${types}">
+                                     <option th:value="${type.tid}" th:text="${type.typename}"></option>
+                                </span>
+                            </select>
+                            <div class="layui-input-inline">
+                                <input type="text" id="typename_input"
+                                       name="typename" required="required" placeholder="请输入添加分类名称" class="layui-input"></div>
+                        </div>
+
+                        <div class="layui-input-inline layui-show-xs-block">
+                            <button id="btnAddType" class="layui-btn">添加分类</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<script>
+    layui.use(['laydate', 'form'],
+        function() {
+            var laydate = layui.laydate;
+
+            //执行一个laydate实例
+            laydate.render({
+                elem: '#start' //指定元素
+            });
+
+            //执行一个laydate实例
+            laydate.render({
+                elem: '#end' //指定元素
+            });
+        });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnAddType").click(function () {
+            //获取当前输入框的分类名称
+            let newTypename = $("#typename_input").val().trim();
+            if(newTypename === ''){
+                return;
+            }
+            //直接提交到后台
+            $.ajax({
+                type: 'GET',
+                url: '[[@{/admin/addType}]]',
+                data: { "newTypeName" : newTypename},
+                success: function (data) {
+                    alert(data.msg);
+                    if(data.code === 200){
+                        window.location.reload();
+                    }
+                }
+            });
+        });
+    });
+</script>
+</html>

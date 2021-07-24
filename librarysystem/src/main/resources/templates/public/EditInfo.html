@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>个人信息</title>
+    <link rel="stylesheet" href="../../static/xadmin/css/font.css" th:href="@{/static/xadmin/css/font.css}">
+    <link rel="stylesheet" href="../../static/xadmin/css/xadmin.css" th:href="@{/static/xadmin/css/xadmin.css}">
+    <script type="text/javascript" src="../../static/xadmin/lib/layui/layui.js" th:src="@{/static/xadmin/lib/layui/layui.js}" charset="utf-8"></script>
+    <script type="text/javascript" src="../../static/xadmin/js/xadmin.js" th:src="@{/static/xadmin/js/xadmin.js}"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <form class="layui-form">
+            <div class="layui-form-item">
+                <label for="L_username" class="layui-form-label">
+                    <span class="x-red">*</span>用户名</label>
+                <div class="layui-input-inline">
+                    <input th:value="${session.result.data.username}" type="text" id="L_username"
+                           name="username" onchange="checkUsername2()" required="" lay-verify="username" autocomplete="off" class="layui-input"></div>
+                <div class="layui-form-mid layui-word-aux">
+                    <span class="x-red">*</span>这是您唯一的登入名</div></div>
+            <div class="layui-form-item">
+                <label for="L_password" class="layui-form-label">
+                    <span class="x-red">*</span>密码</label>
+                <div class="layui-input-inline">
+                    <input th:value="${session.result.data.password}" type="password" id="L_password" name="password" required="" lay-verify="password" autocomplete="off" class="layui-input"></div>
+            </div>
+            <div class="layui-form-item">
+                <label for="L_email" class="layui-form-label">
+                    <span class="x-red">*</span>邮箱</label>
+                <div class="layui-input-inline">
+                    <input th:value="${session.result.data.email}" type="text" id="L_email" name="email" required="" lay-verify="email" autocomplete="off" class="layui-input"></div>
+            </div>
+            <div class="layui-form-item">
+                <label for="L_phone" class="layui-form-label">
+                    <span class="x-red">*</span>电话</label>
+                <div class="layui-input-inline">
+                    <input th:value="${session.result.data.phone}" type="text" id="L_phone" name="phone" required="" lay-verify="phone" autocomplete="off" class="layui-input"></div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="L_phone" class="layui-form-label"></label>
+                    <button class="layui-btn" lay-filter="sure" lay-submit="sureModify">确认修改</button></div>
+        </form>
+    </div>
+</div>
+<script type="text/javascript">
+   function checkUsername2() {
+       var returnVal = true;
+       var username = $("#L_username").val().trim();
+       var oldName = '[[${session.result.data.username}]]';
+       if(username === oldName){
+           return returnVal;
+       }
+       if(username !== ''){
+           var url = '[[@{/checkUsername2}]]';
+           $.ajax({
+               type: 'GET',
+               url: url,
+               data: {
+                   "username":username
+               },
+               async: false,//此处设置为同步请求原因是: 异步请求会在还没来得及更改 returnVal 的值的时候函数就返回了
+               //由于这里是一个简单的操作, 所以可以设置为同步, 如果复杂的耗时操作, 则就没必要了
+               success: function (data) {
+                   if(data){
+                   }else{
+                       layui.layer.alert("当前用户名也被别人占用, 请重新输入!");
+                       returnVal = false;
+                   }
+               }
+           });
+       }
+       return returnVal;
+   }
+</script>
+<script>
+    layui.use(['form', 'layer','jquery'],
+    function() {
+        $ = layui.jquery;
+        var form = layui.form,
+            layer = layui.layer;
+
+        //自定义验证规则
+        form.verify({
+            password: [/(.+){6,12}$/, '密码必须6到12位']
+        });
+
+        //监听提交
+        form.on('submit(sure)',function(data) {
+            //获取用户信息
+            var uid = '[[${session.result.data.uid}]]';
+            var username = $("#L_username").val();
+            var password = $("#L_password").val();
+            var email = $("#L_email").val();
+            var phone = $("#L_phone").val();
+            //发异步，把数据提交给php
+            var flag = checkUsername2();
+            if(flag){
+                $.ajax({
+                    type: 'POST',
+                    url: '/libsys/editInfo',
+                    data:{
+                        "uid":uid,
+                        "username":username,
+                        "password":password,
+                        "email":email,
+                        "phone":phone
+                    },
+                    success: function (data) {
+                        if(data.code === 200){
+                            layer.alert("修改成功", {
+                                    icon: 6
+                                },
+                                function() {
+                                    //关闭当前frame
+                                    xadmin.close();
+                                    // 可以对父窗口进行刷新
+                                    xadmin.father_reload();
+                                });
+                        }else{
+                            layer.alert(data.msg,{icon:5});
+                        }
+
+                    }
+                });
+            }
+            return false;
+        });
+
+    });
+</script>
+<script>
+    var _hmt = _hmt || []; (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?b393d153aeb26b46e9431fabaf0f6190";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+</body>
+</html>
